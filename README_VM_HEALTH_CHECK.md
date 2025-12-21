@@ -74,7 +74,7 @@ The script uses standard Linux commands that are typically available on most sys
 - `top` - for CPU utilization
 - `free` - for memory utilization
 - `df` - for disk space utilization
-- `bc` - for floating-point calculations
+- `awk` - for calculations and text processing
 
 ## Technical Details
 

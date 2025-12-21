@@ -37,13 +37,17 @@ echo "Checking CPU Utilization..."
 
 # Get CPU usage using top command
 # This calculates CPU usage over a 1-second interval
-CPU_USAGE=$(top -bn2 -d 1 | grep "Cpu(s)" | tail -1 | awk '{print $2}' | cut -d'%' -f1)
+CPU_USAGE=$(top -bn2 -d 1 | grep "Cpu(s)" | tail -1 | sed 's/,//g' | awk '{print $2}' | cut -d'%' -f1)
 
-# If top command fails, try alternative method using mpstat
+# If top command fails or returns empty, try alternative approach
 if [ -z "$CPU_USAGE" ]; then
-    # Alternative: Calculate from /proc/stat
-    CPU_IDLE=$(top -bn1 | grep "Cpu(s)" | awk '{print $8}' | cut -d'%' -f1)
-    CPU_USAGE=$(echo "100 - $CPU_IDLE" | bc)
+    # Alternative: Get idle CPU and calculate usage
+    CPU_IDLE=$(top -bn1 | grep "Cpu(s)" | sed 's/,//g' | awk '{print $8}' | cut -d'%' -f1)
+    if [ -n "$CPU_IDLE" ]; then
+        CPU_USAGE=$(awk "BEGIN {printf \"%.1f\", 100 - $CPU_IDLE}")
+    else
+        CPU_USAGE="0.0"
+    fi
 fi
 
 # Convert to integer for comparison (remove decimal part)
@@ -64,11 +68,13 @@ echo ""
 ###############################################################################
 echo "Checking Memory Utilization..."
 
-# Get memory usage using free command
+# Get memory usage using free command (run once for efficiency)
 # Calculate percentage: (Used / Total) * 100
-MEMORY_TOTAL=$(free | grep Mem | awk '{print $2}')
-MEMORY_USED=$(free | grep Mem | awk '{print $3}')
-MEMORY_USAGE=$(echo "scale=2; ($MEMORY_USED / $MEMORY_TOTAL) * 100" | bc)
+MEMORY_INFO=$(free | grep Mem)
+MEMORY_TOTAL=$(echo "$MEMORY_INFO" | awk '{print $2}')
+MEMORY_USED=$(echo "$MEMORY_INFO" | awk '{print $3}')
+# Use awk for calculation to avoid bc dependency
+MEMORY_USAGE=$(awk "BEGIN {printf \"%.2f\", ($MEMORY_USED / $MEMORY_TOTAL) * 100}")
 
 # Convert to integer for comparison
 MEMORY_USAGE_INT=$(echo "$MEMORY_USAGE" | cut -d'.' -f1)
