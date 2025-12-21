@@ -18,9 +18,25 @@ The script uses a **60% threshold** for all metrics:
 
 ### Basic Usage
 
+Run the script without arguments for a standard health check:
+
 ```bash
 ./vm_health_check.sh
 ```
+
+### Explain Mode
+
+Run the script with the `explain` argument to get detailed explanations for the health status:
+
+```bash
+./vm_health_check.sh explain
+```
+
+When using `explain` mode, the script provides:
+- Detailed reasons for each unhealthy metric
+- Specific utilization percentages and their impact
+- Recommendations for remediation
+- Summary of healthy metrics for context
 
 ### Making the Script Executable
 
@@ -38,6 +54,8 @@ The script provides a detailed report showing:
 3. Overall health status with color-coded output
 
 ### Example Output
+
+**Standard Mode:**
 
 ```
 ======================================
@@ -61,6 +79,48 @@ Overall Health Status
 ======================================
 ✗ NOT HEALTHY
 One or more metrics are at or above 60% utilization.
+```
+
+**Explain Mode:**
+
+```
+======================================
+VM Health Check Analysis
+======================================
+
+Checking CPU Utilization...
+  CPU Usage: 0.0%
+  Status: HEALTHY (< 60%)
+
+Checking Memory Utilization...
+  Memory Usage: 12.31%
+  Status: HEALTHY (< 60%)
+
+Checking Disk Space Utilization...
+  Disk Usage (root partition): 78%
+  Status: NOT HEALTHY (>= 60%)
+
+======================================
+Overall Health Status
+======================================
+✗ NOT HEALTHY
+One or more metrics are at or above 60% utilization.
+
+Explanation:
+------------
+The virtual machine requires attention. The following issues were detected:
+
+⚠ Disk space utilization is at 78%, which exceeds the 60% threshold. Running out of disk space can prevent applications from running, cause data loss, or system instability. Clean up unnecessary files or expand disk capacity.
+
+Metrics within normal range:
+• CPU utilization is at 0.0%, which is within acceptable limits.
+• Memory utilization is at 12.31%, which is within acceptable limits.
+
+Recommendations:
+----------------
+• Address the issue identified above to restore system health.
+• Monitor the system regularly to prevent resource exhaustion.
+• Consider scaling resources or optimizing workloads if issues persist.
 ```
 
 ## Exit Codes
